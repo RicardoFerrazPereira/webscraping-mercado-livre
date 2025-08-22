@@ -1,4 +1,4 @@
-# Scrapy settings for mercadolivre project
+# Scrapy settings for coleta project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,10 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "mercadolivre"
+BOT_NAME = "coleta"
 
-SPIDER_MODULES = ["mercadolivre.spiders"]
-NEWSPIDER_MODULE = "mercadolivre.spiders"
+SPIDER_MODULES = ["coleta.spiders"]
+NEWSPIDER_MODULE = "coleta.spiders"
 
 ADDONS = {}
 
@@ -41,13 +41,13 @@ DOWNLOAD_DELAY = 1
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    "mercadolivre.middlewares.MercadolivreSpiderMiddleware": 543,
+#    "coleta.middlewares.coletaSpiderMiddleware": 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    "mercadolivre.middlewares.MercadolivreDownloaderMiddleware": 543,
+#    "coleta.middlewares.coletaDownloaderMiddleware": 543,
 # }
 
 # Enable or disable extensions
@@ -59,7 +59,7 @@ DOWNLOAD_DELAY = 1
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 # ITEM_PIPELINES = {
-#    "mercadolivre.pipelines.MercadolivrePipeline": 300,
+#    "coleta.pipelines.coletaPipeline": 300,
 # }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
