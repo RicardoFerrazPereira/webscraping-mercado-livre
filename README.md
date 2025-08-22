@@ -1,1 +1,2 @@
-# webscraping-mercado-livre
+# Web Scraping Mercado Livre case Samsung
+
