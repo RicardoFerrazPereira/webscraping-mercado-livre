@@ -1,54 +1,71 @@
 import pandas as pd
 import sqlite3
 from datetime import datetime
+import re
 
-# Definir o caminho para o arquivo json
-df = pd.read_json("data/data1.json")
+# ------------------------
+# Carregar JSON
+# ------------------------
+df = pd.read_json("../../data/data1.json")
 
-# Setar o pandas para mostrar todas as colunas
-# pd.options.display.max_columns = None
-
-# Adicionar a coluna _source com um valor fixo
-# df['_source'] = 'https://lista.mercadolivre.com.br/notebook'
-# Adicionar a coluna _source com um valor real (url)
+# ------------------------
+# Adicionar colunas fixas
+# ------------------------
 df['_source'] = df['url']
+df['_datetime'] = datetime.now()
 
-# Adicionar a coluna _source com um valor fixo
-df["_datetime"] = datetime.now()
+# ------------------------
+# EXTRAÇÃO DA MARCA
+# ------------------------
+brands = ["Dell", "Acer", "Samsung", "Lenovo", "Asus", "HP", "Apple", "Positivo", "Vaio"]
 
-# Tratar os valores nulos para colunas numéricas e de texto
+def extract_brand(name):
+    for brand in brands:
+        if brand.lower() in str(name).lower():
+            return brand
+    return "Desconhecida"
 
-# Garantir que estão como string antes de usar .str
-df['old_price'] = df['old_price'].astype(str).str.replace('.', '')
-df['new_price'] = df['new_price'].astype(str).str.replace('.', '')
-# Regex para remover os ( ):
-df['reviews_total'] = df['reviews_total'].astype(str).str.replace(r'[\(\)]', '', regex=True)
-# Remover os ( ) Sem regex (apenas string literal)
-# df['reviews_total'] = df['reviews_total'].astype(str).str.replace('(', '').str.replace(')', '')
+df["brand"] = df["name"].apply(extract_brand)
 
-# Converter para numéricos
-df['old_price'] = df['old_price'].astype(float)
-df['new_price'] = df['new_price'].astype(float)
-df['reviews_total'] = pd.to_numeric(df['reviews_total'], errors='coerce').fillna(0).astype(int)
-#df['reviews_total'] = df['reviews_total'].astype(int)
-df['reviews_rating'] = df['reviews_rating'].astype(float)
+# ------------------------
+# TRATAMENTO DE PREÇOS
+# ------------------------
+for col in ['old_price', 'new_price']:
+    if col in df.columns:
+        # Remove tudo que não seja número ou vírgula/ponto
+        df[col] = df[col].astype(str).str.replace(r'[^0-9,]', '', regex=True)
+        # Substitui vírgula decimal por ponto
+        df[col] = df[col].str.replace(',', '.')
+        # Converte para float
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-# Manter apenas produtos com preço entre 1000 e 10000 reais
+# ------------------------
+# TRATAMENTO DE REVIEWS
+# ------------------------
+if 'reviews_total' in df.columns:
+    df['reviews_total'] = df['reviews_total'].astype(str).str.replace(r'[\(\)]', '', regex=True)
+    df['reviews_total'] = pd.to_numeric(df['reviews_total'], errors='coerce').fillna(0).astype(int)
+
+if 'reviews_rating' in df.columns:
+    df['reviews_rating'] = pd.to_numeric(df['reviews_rating'], errors='coerce').fillna(0.0)
+
+# ------------------------
+# FILTRO DE PREÇOS
+# ------------------------
+df = df.dropna(subset=['old_price', 'new_price'])
 df = df[
     (df['old_price'] >= 1000) & (df['old_price'] <= 10000) &
     (df['new_price'] >= 1000) & (df['new_price'] <= 10000)
 ]
 
-# print(df['reviews_total'])
-
-# Conectar (ou criar) banco local
-conn = sqlite3.connect('data/mercadolivre.db')
-
-# Salvar os dados em uma tabela
+# ------------------------
+# SALVAR NO SQLITE
+# ------------------------
+conn = sqlite3.connect('../../data/mercadolivre2.db')
 df.to_sql('notebooks', conn, if_exists='replace', index=False)
-
-# Encerrar conexão
 conn.close()
 
-
-
+# ------------------------
+# OUTPUT
+# ------------------------
+print(df.head())
